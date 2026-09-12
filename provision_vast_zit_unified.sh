@@ -16,7 +16,7 @@ fi
 MODEL_S3_URI="${MODEL_S3_URI:-s3://rosely-infrastructure/serverless/zimage/zenith13/zenith13-mxfp8-unified-test.tar.zst}"
 MODEL_ARCHIVE_SHA256="${MODEL_ARCHIVE_SHA256:-70062f128985c4e187e50d914ebc4bc073b3941ece4221e4bd8c7e6f8e51308a}"
 MODEL_ARCHIVE_SIZE="${MODEL_ARCHIVE_SIZE:-10703686769}"
-MODEL_AWS_REGION="${MODEL_AWS_REGION:-us-east-1}"
+AWS_ZIT_IMAGE_MODEL_S3_REGION="${AWS_ZIT_IMAGE_MODEL_S3_REGION:-us-east-1}"
 MODEL_DOWNLOAD_CONCURRENCY="${MODEL_DOWNLOAD_CONCURRENCY:-16}"
 MODEL_MULTIPART_CHUNK_MB="${MODEL_MULTIPART_CHUNK_MB:-64}"
 
@@ -165,15 +165,15 @@ else
   log "Installing Python dependency boto3"
   "$PYTHON_BIN" -m pip install --no-cache-dir --quiet boto3
 
-  ACCESS_KEY="${MODEL_AWS_ACCESS_KEY_ID:-${AWS_ACCESS_KEY_ID:-}}"
-  SECRET_KEY="${MODEL_AWS_SECRET_ACCESS_KEY:-${AWS_SECRET_ACCESS_KEY:-}}"
-  SESSION_TOKEN="${MODEL_AWS_SESSION_TOKEN:-${AWS_SESSION_TOKEN:-}}"
-  [[ -n "$ACCESS_KEY" ]] || fail "MODEL_AWS_ACCESS_KEY_ID (or AWS_ACCESS_KEY_ID) is required"
-  [[ -n "$SECRET_KEY" ]] || fail "MODEL_AWS_SECRET_ACCESS_KEY (or AWS_SECRET_ACCESS_KEY) is required"
+  ACCESS_KEY="${AWS_ZIT_IMAGE_MODEL_ACCESS_KEY_ID:-}"
+  SECRET_KEY="${AWS_ZIT_IMAGE_MODEL_SECRET_ACCESS_KEY:-}"
+  SESSION_TOKEN="${AWS_ZIT_IMAGE_MODEL_SESSION_TOKEN:-}"
+  [[ -n "$ACCESS_KEY" ]] || fail "AWS_ZIT_IMAGE_MODEL_ACCESS_KEY_ID (or AWS_ACCESS_KEY_ID) is required"
+  [[ -n "$SECRET_KEY" ]] || fail "AWS_ZIT_IMAGE_MODEL_SECRET_ACCESS_KEY (or AWS_SECRET_ACCESS_KEY) is required"
 
-  export MODEL_S3_URI MODEL_ARCHIVE_SIZE MODEL_AWS_REGION MODEL_DOWNLOAD_CONCURRENCY MODEL_MULTIPART_CHUNK_MB
+  export MODEL_S3_URI MODEL_ARCHIVE_SIZE AWS_ZIT_IMAGE_MODEL_S3_REGION MODEL_DOWNLOAD_CONCURRENCY MODEL_MULTIPART_CHUNK_MB
   export MODEL_ARCHIVE_PATH="$ARCHIVE"
-  export MODEL_S3_ENDPOINT_URL="${MODEL_S3_ENDPOINT_URL:-}"
+  export AWS_ZIT_IMAGE_MODEL_S3_ENDPOINT_URL="${AWS_ZIT_IMAGE_MODEL_S3_ENDPOINT_URL:-}"
   export _ROSELY_ACCESS_KEY="$ACCESS_KEY" _ROSELY_SECRET_KEY="$SECRET_KEY" _ROSELY_SESSION_TOKEN="$SESSION_TOKEN"
 
   rm -f "$ARCHIVE" "$ARCHIVE.partial"
@@ -195,10 +195,10 @@ if u.scheme != "s3" or not u.netloc or not u.path.lstrip("/"):
 bucket, key = u.netloc, u.path.lstrip("/")
 dst = Path(os.environ["MODEL_ARCHIVE_PATH"])
 expected_size = int(os.environ["MODEL_ARCHIVE_SIZE"])
-region = os.environ.get("MODEL_AWS_REGION", "us-east-1")
+region = os.environ.get("AWS_ZIT_IMAGE_MODEL_S3_REGION", "us-east-1")
 concurrency = int(os.environ.get("MODEL_DOWNLOAD_CONCURRENCY", "16"))
 chunk = int(os.environ.get("MODEL_MULTIPART_CHUNK_MB", "64")) * 1024 * 1024
-endpoint = os.environ.get("MODEL_S3_ENDPOINT_URL") or None
+endpoint = os.environ.get("AWS_ZIT_IMAGE_MODEL_S3_ENDPOINT_URL") or None
 kwargs = dict(
     region_name=region,
     aws_access_key_id=os.environ["_ROSELY_ACCESS_KEY"],
@@ -218,13 +218,13 @@ if remote_size != expected_size:
 cfg = TransferConfig(multipart_threshold=chunk, multipart_chunksize=chunk, max_concurrency=concurrency, use_threads=True)
 tmp = Path(str(dst) + ".partial")
 tmp.unlink(missing_ok=True)
-lock = threading.Lock(); downloaded = 0; last = -5; started = time.monotonic()
+lock = threading.Lock(); downloaded = 0; last = -1; started = time.monotonic()
 def progress(n):
     global downloaded, last
     with lock:
         downloaded += n
         pct = int(downloaded * 100 / remote_size)
-        if pct >= last + 5 or downloaded >= remote_size:
+        if pct >= last + 1 or downloaded >= remote_size:
             mib_s = downloaded / max(time.monotonic() - started, 0.001) / 1024**2
             print(f"[Rosely Zenith13] {pct:3d}% {downloaded/1024**3:.2f}/{remote_size/1024**3:.2f} GiB @ {mib_s:.1f} MiB/s", flush=True)
             last = pct

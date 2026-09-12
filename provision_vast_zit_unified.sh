@@ -83,34 +83,34 @@ import sys
 
 replacements = {
     'os.getenv("S3_ACCESS_KEY_ID", "")':
-        'os.getenv("AWS_IMAGE_ACCESS_KEY_ID", "")',
+        'os.getenv("AWS_ZIT_IMAGE_ACCESS_KEY_ID", "")',
 
     'os.getenv("S3_SECRET_ACCESS_KEY", "")':
-        'os.getenv("AWS_IMAGE_SECRET_ACCESS_KEY", "")',
+        'os.getenv("AWS_ZIT_IMAGE_SECRET_ACCESS_KEY", "")',
 
     'os.getenv("S3_BUCKET_NAME", "")':
-        'os.getenv("AWS_IMAGE_S3_BUCKET_NAME", "")',
+        'os.getenv("AWS_ZIT_IMAGE_S3_BUCKET_NAME", "")',
 
     'os.getenv("S3_ENDPOINT_URL", "")':
-        'os.getenv("AWS_IMAGE_S3_ENDPOINT_URL", "")',
+        'os.getenv("AWS_ZIT_IMAGE_S3_ENDPOINT_URL", "")',
 
     'os.getenv("S3_REGION", "us-east-1")':
-        'os.getenv("AWS_IMAGE_S3_REGION", "us-east-1")',
+        'os.getenv("AWS_ZIT_IMAGE_S3_REGION", "us-east-1")',
 
     'os.environ.get("S3_ACCESS_KEY_ID", "")':
-        'os.environ.get("AWS_IMAGE_ACCESS_KEY_ID", "")',
+        'os.environ.get("AWS_ZIT_IMAGE_ACCESS_KEY_ID", "")',
 
     'os.environ.get("S3_SECRET_ACCESS_KEY", "")':
-        'os.environ.get("AWS_IMAGE_SECRET_ACCESS_KEY", "")',
+        'os.environ.get("AWS_ZIT_IMAGE_SECRET_ACCESS_KEY", "")',
 
     'os.environ.get("S3_BUCKET_NAME", "")':
-        'os.environ.get("AWS_IMAGE_S3_BUCKET_NAME", "")',
+        'os.environ.get("AWS_ZIT_IMAGE_S3_BUCKET_NAME", "")',
 
     'os.environ.get("S3_ENDPOINT_URL", "")':
-        'os.environ.get("AWS_IMAGE_S3_ENDPOINT_URL", "")',
+        'os.environ.get("AWS_ZIT_IMAGE_S3_ENDPOINT_URL", "")',
 
     'os.environ.get("S3_REGION", "us-east-1")':
-        'os.environ.get("AWS_IMAGE_S3_REGION", "us-east-1")',
+        'os.environ.get("AWS_ZIT_IMAGE_S3_REGION", "us-east-1")',
 }
 
 for raw in sys.argv[1:]:
@@ -130,17 +130,17 @@ PYPATCH
 
   log "Verifying AWS_IMAGE_* patch"
 
-  grep -q 'AWS_IMAGE_ACCESS_KEY_ID' "$cfg" \
-    || fail "AWS_IMAGE_ACCESS_KEY_ID patch missing from $cfg"
+  grep -q 'AWS_ZIT_IMAGE_ACCESS_KEY_ID' "$cfg" \
+    || fail "AWS_ZIT_IMAGE_ACCESS_KEY_ID patch missing from $cfg"
 
-  grep -q 'AWS_IMAGE_S3_BUCKET_NAME' "$cfg" \
-    || fail "AWS_IMAGE_S3_BUCKET_NAME patch missing from $cfg"
+  grep -q 'AWS_ZIT_IMAGE_S3_BUCKET_NAME' "$cfg" \
+    || fail "AWS_ZIT_IMAGE_S3_BUCKET_NAME patch missing from $cfg"
 
-  grep -q 'AWS_IMAGE_ACCESS_KEY_ID' "$req" \
-    || fail "AWS_IMAGE_ACCESS_KEY_ID patch missing from $req"
+  grep -q 'AWS_ZIT_IMAGE_ACCESS_KEY_ID' "$req" \
+    || fail "AWS_ZIT_IMAGE_ACCESS_KEY_ID patch missing from $req"
 
-  grep -q 'AWS_IMAGE_S3_BUCKET_NAME' "$req" \
-    || fail "AWS_IMAGE_S3_BUCKET_NAME patch missing from $req"
+  grep -q 'AWS_ZIT_IMAGE_S3_BUCKET_NAME' "$req" \
+    || fail "AWS_ZIT_IMAGE_S3_BUCKET_NAME patch missing from $req"
 
   log "API wrapper AWS_IMAGE_* patch verified"
 
